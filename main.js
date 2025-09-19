@@ -46,6 +46,10 @@ function calculate() {
     const guild     = parseFloat(document.getElementById("guild").value) / 100 || 0;
     const secret    = parseFloat(document.getElementById("secret").value) / 100 || 0;
     const equip     = parseFloat(document.getElementById("equip").value) / 100 || 0;
+   const critGear = parseFloat(document.getElementById("critGear").value) / 100 || 0;
+const critRune = parseFloat(document.getElementById("critRune").value) / 100 || 0;
+const evaGear  = parseFloat(document.getElementById("evaGear").value) / 100 || 0;
+const evaRune  = parseFloat(document.getElementById("evaRune").value) / 100 || 0;
     const rune      = parseFloat(document.getElementById("rune").value) / 100 || 0;
     const pet       = parseFloat(document.getElementById("pet").value) / 100 || 0;
     const quicken   = parseFloat(document.getElementById("quicken").value) / 100 || 0;
@@ -77,24 +81,25 @@ function calculate() {
       (furyLvl > 0 ? ` [Fury ×${furyMultipliers[furyLvl].toFixed(2)}]` : "");
 
     // --- Crit Chance ---
-    const critCap = rules.caps.critChance; // 0.5
-    const critEq  = equip + rune;
-    const critWaste = critEq > critCap ? (critEq - critCap) * 100 : 0;
-    const shownCrit = critEq > critCap ? critCap : critEq;
+    // Crit Chance
+const critCap = rules.caps.critChance; // 0.5
+const critTotal = critGear + critRune;
+const critWaste = critTotal > critCap ? (critTotal - critCap) * 100 : 0;
+const shownCrit = critTotal > critCap ? critCap : critTotal;
 
-    document.getElementById("crit").innerText =
-      `Crit Chance: ${(shownCrit * 100).toFixed(1)}% (cap ${critCap * 100}%)` +
-      (critEq >= critCap ? (critWaste > 0 ? ` [Waste ${critWaste.toFixed(1)}%]` : " [OK]") : "");
+document.getElementById("crit").innerText =
+  `Crit Chance: ${(shownCrit * 100).toFixed(1)}% (cap ${critCap * 100}%)` +
+  (critTotal >= critCap ? (critWaste > 0 ? ` [Waste ${critWaste.toFixed(1)}%]` : " [OK]") : "");
 
-    // --- Evasion ---
-    const evaCap = rules.caps.evasion; // 0.4
-    const evaEq  = equip + rune;
-    const evaWaste = evaEq > evaCap ? (evaEq - evaCap) * 100 : 0;
-    const shownEva = evaEq > evaCap ? evaCap : evaEq;
+// Evasion
+const evaCap = rules.caps.evasion; // 0.4
+const evaTotal = evaGear + evaRune;
+const evaWaste = evaTotal > evaCap ? (evaTotal - evaCap) * 100 : 0;
+const shownEva = evaTotal > evaCap ? evaCap : evaTotal;
 
-    document.getElementById("evasion").innerText =
-      `Evasion: ${(shownEva * 100).toFixed(1)}% (cap ${evaCap * 100}%)` +
-      (evaEq >= evaCap ? (evaWaste > 0 ? ` [Waste ${evaWaste.toFixed(1)}%]` : " [OK]") : "");
+document.getElementById("evasion").innerText =
+  `Evasion: ${(shownEva * 100).toFixed(1)}% (cap ${evaCap * 100}%)` +
+  (evaTotal >= evaCap ? (evaWaste > 0 ? ` [Waste ${evaWaste.toFixed(1)}%]` : " [OK]") : "");
 
   } catch (err) {
     document.getElementById("atkspd").innerText = "Calc error: " + err.message;
