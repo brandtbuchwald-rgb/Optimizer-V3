@@ -1,72 +1,56 @@
 // ===== Rediscover Build Generator 2.0 (safe version) =====
-let rules = null;
+let rules;
 
-// bust some stale caches for the JSON at least
-(async function init() {
+async function loadRules() {
   try {
     const res = await fetch("gearRules.json", { cache: "no-store" });
     rules = await res.json();
   } catch (e) {
-    const el = document.getElementById("atkspd");
-    if (el) el.innerText = "Failed to load rules: " + e.message;
+    document.getElementById("atkspd").innerText = "Failed to load rules.";
   }
-})();
+}
+loadRules();
 
-// Fury multipliers from in-game tooltips
-// Lv10 = 4.00x, Lv13 = 4.54x. Interpolated 11/12.
+// Fury multipliers (from in-game tooltips)
 const furyMultipliers = { 10: 4.00, 11: 4.20, 12: 4.37, 13: 4.54 };
-
-// helpers
-const pct = id => {
-  const v = parseFloat(document.getElementById(id).value);
-  return isNaN(v) ? 0 : v / 100;
-};
-const frac = id => {
-  const v = parseFloat(document.getElementById(id).value);
-  return isNaN(v) ? 0 : v; // these selects already store 0..0.30 etc.
-};
 
 function calculate() {
   try {
     if (!rules) {
-      document.getElementById("atkspd").innerText = "Loading rules… try again.";
+      document.getElementById("atkspd").innerText = "Rules not loaded yet!";
       return;
     }
 
     const cls      = document.getElementById("cls").value;
     const baseInfo = rules.baseSpeeds[cls];
-    if (!baseInfo || typeof baseInfo.Normal !== "number") {
-      throw new Error("Base speed not found for " + cls);
-    }
-    const base = baseInfo.Normal;
+    const base     = baseInfo.Normal;
 
-    // inputs
+    // Inputs
     const statColor = parseFloat(document.getElementById("statColor").value) || 0;
     const char      = parseFloat(document.getElementById("char").value) || 0;
-    const guild     = parseFloat(document.getElementById("guild").value) / 100 || 0;
-    const secret    = parseFloat(document.getElementById("secret").value) / 100 || 0;
-    const equip     = parseFloat(document.getElementById("equip").value) / 100 || 0;
-   const critGear = parseFloat(document.getElementById("critGear").value) / 100 || 0;
-const critRune = parseFloat(document.getElementById("critRune").value) / 100 || 0;
-const evaGear  = parseFloat(document.getElementById("evaGear").value) / 100 || 0;
-const evaRune  = parseFloat(document.getElementById("evaRune").value) / 100 || 0;
-    const rune      = parseFloat(document.getElementById("rune").value) / 100 || 0;
-    const pet       = parseFloat(document.getElementById("pet").value) / 100 || 0;
-    const quicken   = parseFloat(document.getElementById("quicken").value) / 100 || 0;
+    const guild     = (parseFloat(document.getElementById("guild").value) || 0) / 100;
+    const secret    = (parseFloat(document.getElementById("secret").value) || 0) / 100;
+    const equip     = (parseFloat(document.getElementById("equip").value) || 0) / 100;
+    const rune      = (parseFloat(document.getElementById("rune").value) || 0) / 100;
+    const pet       = (parseFloat(document.getElementById("pet").value) || 0) / 100;
+    const quicken   = (parseFloat(document.getElementById("quicken").value) || 0) / 100;
+
+    const critGear  = (parseFloat(document.getElementById("critGear").value) || 0) / 100;
+    const critRune  = (parseFloat(document.getElementById("critRune").value) || 0) / 100;
+    const evaGear   = (parseFloat(document.getElementById("evaGear").value) || 0) / 100;
+    const evaRune   = (parseFloat(document.getElementById("evaRune").value) || 0) / 100;
+
     const furyLvl   = parseInt(document.getElementById("fury").value) || 0;
 
-    // total ATK SPD bonus (fraction)
+    // Total ATK SPD bonus
     const atkSpdBonus = statColor + char + guild + secret + equip + rune + pet;
 
-    // fury multipliers
-    const furyMultipliers = { 10: 4.00, 11: 4.20, 12: 4.37, 13: 4.54 };
-
-    // attack speed time
+    // ASPD formula
     let atkSpdTime;
     if (furyLvl > 0 && furyMultipliers[furyLvl]) {
       atkSpdTime = base * (1 - atkSpdBonus) / furyMultipliers[furyLvl];
     } else {
-     atkSpdTime = base * (1 - atkSpdBonus) / (1 + quicken);
+      atkSpdTime = base * (1 - atkSpdBonus) / (1 + quicken);
     }
 
     // --- Attack Speed ---
@@ -81,25 +65,24 @@ const evaRune  = parseFloat(document.getElementById("evaRune").value) / 100 || 0
       (furyLvl > 0 ? ` [Fury ×${furyMultipliers[furyLvl].toFixed(2)}]` : "");
 
     // --- Crit Chance ---
-    // Crit Chance
-const critCap = rules.caps.critChance; // 0.5
-const critTotal = critGear + critRune;
-const critWaste = critTotal > critCap ? (critTotal - critCap) * 100 : 0;
-const shownCrit = critTotal > critCap ? critCap : critTotal;
+    const critCap = rules.caps.critChance; // 0.5
+    const critTotal = critGear + critRune;
+    const critWaste = critTotal > critCap ? (critTotal - critCap) * 100 : 0;
+    const shownCrit = critTotal > critCap ? critCap : critTotal;
 
-document.getElementById("crit").innerText =
-  `Crit Chance: ${(shownCrit * 100).toFixed(1)}% (cap ${critCap * 100}%)` +
-  (critTotal >= critCap ? (critWaste > 0 ? ` [Waste ${critWaste.toFixed(1)}%]` : " [OK]") : "");
+    document.getElementById("crit").innerText =
+      `Crit Chance: ${(shownCrit * 100).toFixed(1)}% (cap ${critCap * 100}%)` +
+      (critTotal >= critCap ? (critWaste > 0 ? ` [Waste ${critWaste.toFixed(1)}%]` : " [OK]") : "");
 
-// Evasion
-const evaCap = rules.caps.evasion; // 0.4
-const evaTotal = evaGear + evaRune;
-const evaWaste = evaTotal > evaCap ? (evaTotal - evaCap) * 100 : 0;
-const shownEva = evaTotal > evaCap ? evaCap : evaTotal;
+    // --- Evasion ---
+    const evaCap = rules.caps.evasion; // 0.4
+    const evaTotal = evaGear + evaRune;
+    const evaWaste = evaTotal > evaCap ? (evaTotal - evaCap) * 100 : 0;
+    const shownEva = evaTotal > evaCap ? evaCap : evaTotal;
 
-document.getElementById("evasion").innerText =
-  `Evasion: ${(shownEva * 100).toFixed(1)}% (cap ${evaCap * 100}%)` +
-  (evaTotal >= evaCap ? (evaWaste > 0 ? ` [Waste ${evaWaste.toFixed(1)}%]` : " [OK]") : "");
+    document.getElementById("evasion").innerText =
+      `Evasion: ${(shownEva * 100).toFixed(1)}% (cap ${evaCap * 100}%)` +
+      (evaTotal >= evaCap ? (evaWaste > 0 ? ` [Waste ${evaWaste.toFixed(1)}%]` : " [OK]") : "");
 
   } catch (err) {
     document.getElementById("atkspd").innerText = "Calc error: " + err.message;
