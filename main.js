@@ -102,47 +102,76 @@ function calculate() {
   q("optAtk").innerText=`With Optimal Gear: ${(atkTime_opt<=rules.caps.atkSpd?rules.caps.atkSpd:atkTime_opt).toFixed(3)}s`;
 }
 
-function buildLayout({cls,focus,weaponCat,weaponTier,gearTier,baseline}){
-  const normalLines=tierLines[gearTier];
-  const layout={};
+function buildLayout({cls, focus, weaponCat, weaponTier, gearTier, baseline}) {
+  const normalLines = tierLines[gearTier];
+  const layout = {};
 
-  // allocate caps
-  const capStats=["ATK SPD","Crit Chance","Evasion"];
-  const placedCaps=new Set();
-  for(const slot of rules.slots){
-    if(slot==="Weapon"){layout[slot]=[];continue;}
-    const arr=[];
-    for(const stat of capStats){
-      if(slotPools[slot].includes(stat) && !placedCaps.has(stat)){
-        arr.push(stat);placedCaps.add(stat);break;
+  // === Step 1: Initialize slots ===
+  for (const slot of rules.slots) layout[slot] = [];
+
+  // === Step 2: Weapon ===
+  layout.Weapon = buildWeapon({focus, weaponCat, weaponTier});
+
+  // === Step 3: Dynamic cap filling ===
+  const caps = {
+    "ATK SPD": rules.caps.atkSpd,
+    "Crit Chance": rules.caps.critChance,
+    "Evasion": rules.caps.evasion
+  };
+
+  const current = {
+    "ATK SPD": baseline.atkSpd,
+    "Crit Chance": baseline.crit,
+    "Evasion": baseline.eva
+  };
+
+  const gainPerLine = { "ATK SPD": 0.10, "Crit Chance": 0.10, "Evasion": 0.10 };
+
+  for (const capStat of Object.keys(caps)) {
+    while (current[capStat] < caps[capStat]) {
+      let placed = false;
+      for (const slot of rules.slots) {
+        if (slot === "Weapon") continue;
+        const arr = layout[slot];
+        if (arr.length >= normalLines) continue;
+        if (!slotPools[slot].includes(capStat)) continue;
+        if (arr.includes(capStat)) continue;
+
+        arr.push(capStat);
+        current[capStat] += gainPerLine[capStat];
+        placed = true;
+        break;
       }
+      if (!placed) break;
     }
-    layout[slot]=arr;
   }
 
-  // fill rest
-  const prio=prioByFocus[focus];
-  for(const slot of rules.slots){
-    if(slot==="Weapon") continue;
-    const arr=layout[slot];
-    const chosen=new Set(arr);
-    for(const stat of prio){
-      if(arr.length>=normalLines) break;
-      if(!slotPools[slot].includes(stat)) continue;
-      if(chosen.has(stat)) continue;
-      arr.push(stat);chosen.add(stat);
+  // === Step 4: Fill remaining lines by role priority ===
+  const prio = prioByFocus[focus];
+
+  for (const slot of rules.slots) {
+    if (slot === "Weapon") continue;
+    const arr = layout[slot];
+    const chosen = new Set(arr);
+
+    for (const stat of prio) {
+      if (arr.length >= normalLines) break;
+      if (!slotPools[slot].includes(stat)) continue;
+      if (chosen.has(stat)) continue;
+      arr.push(stat);
+      chosen.add(stat);
     }
-    if((gearTier==="Chaos"||gearTier==="Abyss") && rules.purpleBySlot[slot]){
+
+    // Purple line (Chaos/Abyss only)
+    if ((gearTier === "Chaos" || gearTier === "Abyss") && rules.purpleBySlot[slot]) {
       arr.push(`(5th: ${rules.purpleBySlot[slot]})`);
     }
-    layout[slot]=arr;
+
+    layout[slot] = arr;
   }
 
-  // weapon
-  layout.Weapon=buildWeapon({focus,weaponCat,weaponTier});
   return layout;
 }
-
 function buildWeapon({focus,weaponCat,weaponTier}){
   if(weaponCat==="World Boss / PvP") return ["ATK%","Crit DMG"];
   const lines=tierLines[weaponTier];
