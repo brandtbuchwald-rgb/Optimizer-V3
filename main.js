@@ -75,28 +75,33 @@ function calculate() {
     const evaEq   = equip + rune;
 
     // output
- // Attack speed check
+// --- Attack Speed ---
 const atkCap  = rules.caps.atkSpd;   // 0.25
 const atkOK   = atkSpdTime <= atkCap;
-
-// If below cap, show cap instead of raw value
 const shownSpd = atkOK ? atkCap : atkSpdTime;
 
 document.getElementById("atkspd").innerText =
   `Attack Speed: ${shownSpd.toFixed(3)}s (${atkOK ? "OK" : "Not capped"})` +
+  (atkOK && atkSpdTime < atkCap ? ` [Waste ${( (atkCap - atkSpdTime) / atkCap * 100 ).toFixed(1)}%]` : "") +
   (furyLvl > 0 ? ` [Fury ×${furyMultipliers[furyLvl].toFixed(2)}]` : "");
 
-// Crit
-document.getElementById("crit").innerText =
-  `Crit Chance: ${(critEq * 100).toFixed(1)}% (cap ${critCap * 100}%)` +
-  (critEq > critCap ? " [Overcapped]" : "");
+// --- Crit Chance ---
+const critCap = rules.caps.critChance;
+const critEq  = equip + rune; // equipment+rune only, per your rulebook
+const critWaste = critEq > critCap ? (critEq - critCap) * 100 : 0;
+const shownCrit = critEq > critCap ? critCap : critEq;
 
-// Evasion
+document.getElementById("crit").innerText =
+  `Crit Chance: ${(shownCrit * 100).toFixed(1)}% (cap ${critCap * 100}%)` +
+  (critEq >= critCap ? " (OK" + (critWaste > 0 ? `, waste ${critWaste.toFixed(1)}%)` : ")") : "");
+
+// --- Evasion ---
+const evaCap = rules.caps.evasion;
+const evaEq  = equip + rune;
+const evaWaste = evaEq > evaCap ? (evaEq - evaCap) * 100 : 0;
+const shownEva = evaEq > evaCap ? evaCap : evaEq;
+
 document.getElementById("evasion").innerText =
-  `Evasion: ${(evaEq * 100).toFixed(1)}% (cap ${evaCap * 100}%)` +
-  (evaEq > evaCap ? " [Overcapped]" : "");
-    // visible error for iPhone where you have no console
-    const el = document.getElementById("atkspd");
-    if (el) el.innerText = "Calc error: " + err.message;
-  }
+  `Evasion: ${(shownEva * 100).toFixed(1)}% (cap ${evaCap * 100}%)` +
+  (evaEq >= evaCap ? " (OK" + (evaWaste > 0 ? `, waste ${evaWaste.toFixed(1)}%)` : ")") : "");
 }
