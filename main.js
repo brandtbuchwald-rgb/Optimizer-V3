@@ -62,7 +62,7 @@ function calculate() {
     if (furyLvl > 0 && furyMultipliers[furyLvl]) {
       atkSpdTime = base * (1 - atkSpdBonus) / furyMultipliers[furyLvl];
     } else {
-      atkSpdTime = base * (1 - atkSpdBonus) * (1 - quicken);
+     atkSpdTime = base * (1 - atkSpdBonus) / (1 + quicken);
     }
 
     // --- Attack Speed ---
