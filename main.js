@@ -12,12 +12,19 @@ async function loadRules() {
 loadRules();
 
 // Fury denominator constants
-const furyDenoms = {
-  10: 2.38,
-  11: 2.35,
-  12: 2.31,
-  13: 2.28
+// Fury multipliers from in-game tooltip
+const furyMultipliers = {
+  10: 4.00,
+  11: 4.20,
+  12: 4.37,
+  13: 4.54
 };
+
+if (furyLvl > 0 && furyMultipliers[furyLvl]) {
+  atkSpdTime = base * (1 - atkSpdBonus) / furyMultipliers[furyLvl];
+} else {
+  atkSpdTime = base * (1 - atkSpdBonus) * (1 - quicken);
+}
 
 function calculate() {
   if (!rules) {
