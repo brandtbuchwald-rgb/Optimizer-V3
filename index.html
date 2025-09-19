@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Rediscover Gear Optimizer</title>
+  <title>Rediscover Build Generator 2.0</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -43,53 +43,33 @@
       </select>
     </label>
 
-    <label>Guild Buff %:
-      <input type="number" id="guild" value="0" min="0" max="5"> %
+    <label>Guild Buff %: <input type="number" id="guild" value="0" min="0" max="5"></label>
+    <label>Secret Tech %: <input type="number" id="secret" value="0" min="0" max="10"></label>
+    <label>Equipment %: <input type="number" id="equip" value="0" min="0" max="100"></label>
+    <label>Runes %: <input type="number" id="rune" value="0" min="0" max="100"></label>
+    <label>Pet Gear %: <input type="number" id="pet" value="0" min="0" max="12"></label>
+    <label>Quicken %: <input type="number" id="quicken" value="0" min="0" max="5"></label>
+
+    <label>Fury Level:
+      <select id="fury">
+        <option value="0">None</option>
+        <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
+        <option value="13">13</option>
+      </select>
     </label>
 
-    <label>Secret Tech %:
-      <input type="number" id="secret" value="0" min="0" max="10"> %
-    </label>
-
-    <label>Equipment %:
-      <input type="number" id="equip" value="0" min="0" max="100"> %
-    </label>
-
-    <label>Runes %:
-      <input type="number" id="rune" value="0" min="0" max="100"> %
-    </label>
-
-    <label>Pet Gear %:
-      <input type="number" id="pet" value="0" min="0" max="12"> %
-    </label>
-
-    <label>Quicken %:
-      <input type="number" id="quicken" value="0" min="0" max="5"> %
-    </label>
-<label>Fury Level:
-  <select id="fury">
-    <option value="0">None</option>
-    <option value="10">10</option>
-    <option value="11">11</option>
-    <option value="12">12</option>
-    <option value="13">13</option>
-  </select>
-</label>
     <button onclick="calculate()">Calculate</button>
   </div>
 
   <div class="results">
     <h2>Results</h2>
-    <p id="atkspd"></p>
-    <p id="crit"></p>
-    <p id="evasion"></p>
+    <p id="atkspd">Attack Speed: —</p>
+    <p id="crit">Crit Chance: —</p>
+    <p id="evasion">Evasion: —</p>
   </div>
-<div class="results">
-  <h2>Results</h2>
-  <p id="atkspd">Attack Speed: —</p>
-  <p id="crit">Crit Chance: —</p>
-  <p id="evasion">Evasion: —</p>
-</div>
+
   <script src="main.js"></script>
 </body>
 </html>
