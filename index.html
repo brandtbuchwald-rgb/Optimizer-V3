@@ -1,31 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Rediscover Build Generator 2.0</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h1>Rediscover Build Generator 2.0</h1>
 
   <div class="inputs">
-    <label>Class:
-      <select id="cls">
-        <option>Berserker</option>
-        <option>Paladin</option>
-        <option>Ranger</option>
-        <option>Sorcerer</option>
+    <label>Class
+      <select id="cls"></select>
+    </label>
+
+    <label>Weapon Category
+      <select id="weaponCat"></select>
+    </label>
+
+    <label>Weapon Tier
+      <select id="weaponTier">
+        <option value="Primal">Primal</option>
+        <option value="Original">Original</option>
+        <option value="Chaos">Chaos</option>
+        <option value="Abyss">Abyss</option>
       </select>
     </label>
 
-    <label>Focus:
+    <label>Armor Gear Tier
+      <select id="gearTier">
+        <option value="Primal">Primal (3 lines)</option>
+        <option value="Original">Original (4 lines)</option>
+        <option value="Chaos">Chaos (4 + purple)</option>
+        <option value="Abyss">Abyss (4 + purple)</option>
+      </select>
+    </label>
+
+    <label>Focus
       <select id="focus">
-        <option>DPS</option>
-        <option>Tank</option>
+        <option value="DPS">DPS</option>
+        <option value="Tank">Tank</option>
       </select>
     </label>
 
-    <label>Stat Colour:
+    <label>Stat Colour
       <select id="statColor">
         <option value="0">White (0%)</option>
         <option value="0.10">Blue (10%)</option>
@@ -34,31 +51,31 @@
       </select>
     </label>
 
-    <label>Characteristic:
+    <label>Characteristic
       <select id="char">
         <option value="0">None</option>
         <option value="0.07">Heroic (7%)</option>
         <option value="0.10">Swift (10%)</option>
-        <option value="-0.10">Thick Headed (-10%)</option>
+        <option value="-0.10">Thick headed (-10%)</option>
       </select>
     </label>
 
-    <label>Guild Buff %: <input id="guild" type="number" value="0" min="0" max="5"></label>
-    <label>Secret Tech %: <input id="secret" type="number" value="0" min="0" max="10"></label>
-    <label>Pet Gear %: <input id="pet" type="number" value="0" min="0" max="12"></label>
-    <label>Quicken %: <input id="quicken" type="number" value="0" min="0" max="5"></label>
+    <label>Guild Buff % <input id="guild" type="number" value="0" min="0" max="5"></label>
+    <label>Secret Tech % <input id="secret" type="number" value="0" min="0" max="10"></label>
+    <label>Pet Gear % <input id="pet" type="number" value="0" min="0" max="12"></label>
+    <label>Quicken % <input id="quicken" type="number" value="0" min="0" max="5"></label>
 
     <h2>Gear Lines</h2>
-    <label>Equipment ATK SPD %: <input id="equipAtkSpd" type="number" value="0"></label>
-    <label>Equipment Crit %: <input id="equipCrit" type="number" value="0"></label>
-    <label>Equipment Evasion %: <input id="equipEva" type="number" value="0"></label>
+    <label>Equipment ATK SPD % <input id="equipAtkSpd" type="number" value="0"></label>
+    <label>Equipment Crit % <input id="equipCrit" type="number" value="0"></label>
+    <label>Equipment Evasion % <input id="equipEva" type="number" value="0"></label>
 
     <h2>Runes</h2>
-    <label>Rune ATK SPD %: <input id="runeAtkSpd" type="number" value="0"></label>
-    <label>Rune Crit %: <input id="runeCrit" type="number" value="0"></label>
-    <label>Rune Evasion %: <input id="runeEva" type="number" value="0"></label>
+    <label>Rune ATK SPD % <input id="runeAtkSpd" type="number" value="0"></label>
+    <label>Rune Crit % <input id="runeCrit" type="number" value="0"></label>
+    <label>Rune Evasion % <input id="runeEva" type="number" value="0"></label>
 
-    <label>Fury Level:
+    <label>Fury Level
       <select id="fury">
         <option value="0">None</option>
         <option value="10">10</option>
@@ -68,7 +85,7 @@
       </select>
     </label>
 
-    <button onclick="calculate()">Calculate</button>
+    <button id="calcBtn">Calculate</button>
   </div>
 
   <div class="results">
@@ -81,6 +98,8 @@
 
     <p id="evasion">Evasion: —</p>
     <div class="bar"><div id="evaBar"></div></div>
+
+    <p id="optAtk">With Optimal Gear: —</p>
   </div>
 
   <div id="gearLayout">
