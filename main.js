@@ -41,67 +41,62 @@ function calculate() {
     const base = baseInfo.Normal;
 
     // inputs
-    const statColor = frac("statColor");
-    const char      = frac("char");
-    const guild     = pct("guild");
-    const secret    = pct("secret");
-    const equip     = pct("equip");
-    const rune      = pct("rune");
-    const pet       = pct("pet");
-    const quicken   = pct("quicken");
+    const statColor = parseFloat(document.getElementById("statColor").value) || 0;
+    const char      = parseFloat(document.getElementById("char").value) || 0;
+    const guild     = parseFloat(document.getElementById("guild").value) / 100 || 0;
+    const secret    = parseFloat(document.getElementById("secret").value) / 100 || 0;
+    const equip     = parseFloat(document.getElementById("equip").value) / 100 || 0;
+    const rune      = parseFloat(document.getElementById("rune").value) / 100 || 0;
+    const pet       = parseFloat(document.getElementById("pet").value) / 100 || 0;
+    const quicken   = parseFloat(document.getElementById("quicken").value) / 100 || 0;
     const furyLvl   = parseInt(document.getElementById("fury").value) || 0;
 
-    // Total ATK SPD bonus (fractions)
+    // total ATK SPD bonus (fraction)
     const atkSpdBonus = statColor + char + guild + secret + equip + rune + pet;
 
-    // Attack speed time
+    // fury multipliers
+    const furyMultipliers = { 10: 4.00, 11: 4.20, 12: 4.37, 13: 4.54 };
+
+    // attack speed time
     let atkSpdTime;
     if (furyLvl > 0 && furyMultipliers[furyLvl]) {
-      // When Fury is active, use the in-game multiplier
       atkSpdTime = base * (1 - atkSpdBonus) / furyMultipliers[furyLvl];
     } else {
-      // No Fury → old behavior; quicken is multiplicative time reducer
       atkSpdTime = base * (1 - atkSpdBonus) * (1 - quicken);
     }
-    if (!isFinite(atkSpdTime)) throw new Error("Invalid ASPD math");
 
-    const atkCap  = rules.caps.atkSpd;
+    // --- Attack Speed ---
+    const atkCap  = rules.caps.atkSpd;   // 0.25
     const atkOK   = atkSpdTime <= atkCap;
+    const atkWaste = atkOK ? ((atkCap - atkSpdTime) / atkCap * 100) : 0;
+    const shownSpd = atkOK ? atkCap : atkSpdTime;
 
-    // Crit/Evasion check vs equipment+rune caps only (your rulebook)
-    const critCap = rules.caps.critChance;
-    const evaCap  = rules.caps.evasion;
+    document.getElementById("atkspd").innerText =
+      `Attack Speed: ${shownSpd.toFixed(3)}s (${atkOK ? "OK" : "Not capped"})` +
+      (atkOK && atkWaste > 0.1 ? ` [Waste ${atkWaste.toFixed(1)}%]` : "") +
+      (furyLvl > 0 ? ` [Fury ×${furyMultipliers[furyLvl].toFixed(2)}]` : "");
+
+    // --- Crit Chance ---
+    const critCap = rules.caps.critChance; // 0.5
     const critEq  = equip + rune;
-    const evaEq   = equip + rune;
+    const critWaste = critEq > critCap ? (critEq - critCap) * 100 : 0;
+    const shownCrit = critEq > critCap ? critCap : critEq;
 
-    // output
-// --- Attack Speed ---
-const atkCap  = rules.caps.atkSpd;   // 0.25
-const atkOK   = atkSpdTime <= atkCap;
-const shownSpd = atkOK ? atkCap : atkSpdTime;
+    document.getElementById("crit").innerText =
+      `Crit Chance: ${(shownCrit * 100).toFixed(1)}% (cap ${critCap * 100}%)` +
+      (critEq >= critCap ? (critWaste > 0 ? ` [Waste ${critWaste.toFixed(1)}%]` : " [OK]") : "");
 
-document.getElementById("atkspd").innerText =
-  `Attack Speed: ${shownSpd.toFixed(3)}s (${atkOK ? "OK" : "Not capped"})` +
-  (atkOK && atkSpdTime < atkCap ? ` [Waste ${( (atkCap - atkSpdTime) / atkCap * 100 ).toFixed(1)}%]` : "") +
-  (furyLvl > 0 ? ` [Fury ×${furyMultipliers[furyLvl].toFixed(2)}]` : "");
+    // --- Evasion ---
+    const evaCap = rules.caps.evasion; // 0.4
+    const evaEq  = equip + rune;
+    const evaWaste = evaEq > evaCap ? (evaEq - evaCap) * 100 : 0;
+    const shownEva = evaEq > evaCap ? evaCap : evaEq;
 
-// --- Crit Chance ---
-const critCap = rules.caps.critChance;
-const critEq  = equip + rune; // equipment+rune only, per your rulebook
-const critWaste = critEq > critCap ? (critEq - critCap) * 100 : 0;
-const shownCrit = critEq > critCap ? critCap : critEq;
+    document.getElementById("evasion").innerText =
+      `Evasion: ${(shownEva * 100).toFixed(1)}% (cap ${evaCap * 100}%)` +
+      (evaEq >= evaCap ? (evaWaste > 0 ? ` [Waste ${evaWaste.toFixed(1)}%]` : " [OK]") : "");
 
-document.getElementById("crit").innerText =
-  `Crit Chance: ${(shownCrit * 100).toFixed(1)}% (cap ${critCap * 100}%)` +
-  (critEq >= critCap ? " (OK" + (critWaste > 0 ? `, waste ${critWaste.toFixed(1)}%)` : ")") : "");
-
-// --- Evasion ---
-const evaCap = rules.caps.evasion;
-const evaEq  = equip + rune;
-const evaWaste = evaEq > evaCap ? (evaEq - evaCap) * 100 : 0;
-const shownEva = evaEq > evaCap ? evaCap : evaEq;
-
-document.getElementById("evasion").innerText =
-  `Evasion: ${(shownEva * 100).toFixed(1)}% (cap ${evaCap * 100}%)` +
-  (evaEq >= evaCap ? " (OK" + (evaWaste > 0 ? `, waste ${evaWaste.toFixed(1)}%)` : ")") : "");
+  } catch (err) {
+    document.getElementById("atkspd").innerText = "Calc error: " + err.message;
+  }
 }
